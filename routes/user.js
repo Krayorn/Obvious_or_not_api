@@ -13,7 +13,7 @@ router.post('', (req, res) => {
 
     req.asyncValidationErrors()
     .then(() => {
-        User.findOne({ $or: [{username: username}] }, (err, user) => {
+        User.findOne({username: username}, (err, user) => {
             if(err) throw err
             if (user) {
                 if (username == user.username) {
@@ -38,10 +38,7 @@ router.post('', (req, res) => {
                                 data: result
                             })
                         }).catch(err => {
-                            res.sjson({
-                                status: 500,
-                                err,
-                            })
+                            res.sjson({ status: 500, err })
                         })
                     }
                 })
