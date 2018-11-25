@@ -5,16 +5,18 @@ import jwt from 'jsonwebtoken'
 
 const router = express.Router()
 
-router.post('/', function(req, res){
+router.post('', function(req, res){
     User.findOne({username: req.body.username}, (err, user) => {
         if (!user) {
-            return res.status(401).json({
+            return res.sjson({
+                status: 401,
                 failed: 'Unrecognised Username'
             })
         }
         bcrypt.compare(req.body.password, user.password, (err, result) => {
             if(err) {
-                return res.status(401).json({
+                return res.sjson({
+                    status: 401,
                     failed: 'Unauthorized Access'
                 })
             }
@@ -25,22 +27,23 @@ router.post('/', function(req, res){
                     },
                     'secret',
                     {
-                        expiresIn: '2h'
+                        expiresIn: '24h'
                     })
 
-                    return res.status(200).json({
-                        success: 'Welcome to the JWT Auth',
+                    return res.sjson({
+                        status: 200,
                         token: JWTToken
                     })
             }
-            return res.status(401).json({
+            return res.sjson({
+                status: 401,
                 failed: 'Unauthorized Access'
             })
         })
     })
     .catch(err => {
-        console.log('catched?', err)
-        res.status(500).json({
+        res.sjson({
+            status: 500,
             err,
         })
     })
