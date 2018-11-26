@@ -8,6 +8,7 @@ import expressValidator from 'express-validator'
 
 import userRouter from './routes/user'
 import authRouter from './routes/auth'
+import surveyRouter from './routes/survey'
 
 dotenv.config()
 
@@ -38,8 +39,10 @@ app.use(expressValidator({
 }))
 
 function authChecker(req, res, next) {
+    console.log(req.method)
     const token = req.body.token || req.headers['x-access-token']
-    if (req.url === '/auth' || req.url === '/user') {
+    if (req.url === '/auth' || req.url === '/user'
+    || (req.url === '/survey' && req.method == 'GET')) {
         return next()
     }
 
@@ -68,5 +71,6 @@ app.use((req, res, next) => {
 
 app.use('/user', userRouter)
 app.use('/auth', authRouter)
+app.use('/survey', surveyRouter)
 
 export default app
