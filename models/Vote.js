@@ -2,15 +2,15 @@ import mongoose from 'mongoose'
 
 const VoteSchema = mongoose.Schema({
     user_id: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         required: true
     },
     survey_id: {
-        type: String,
+        type: mongoose.Types.ObjectId,
         required: true
     },
     option_id: {
-        type: Number,
+        type: mongoose.Types.ObjectId,
         required: true
     },
 })
