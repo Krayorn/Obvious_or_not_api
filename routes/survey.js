@@ -35,33 +35,38 @@ router.post('', (req, res) => {
 router.get('', (req, res) => {
     Survey.find({}).sort({ field: 'asc', _id: -1 }).limit(20)
     .then(surveys => {
-        const promiseArray = []
+        const optionsIds = []
+
         surveys.forEach(survey => {
             survey.options.forEach(opt => {
-                promiseArray.push(Vote.find({option_id: opt._id}).countDocuments())
+                optionsIds.push(opt._id)
             })
         })
 
-        return Promise.all(
-            promiseArray
-        )
-        .then(([...allCounts]) => {
-            let i = 0
+        return Vote.find({ option_id: { $in : optionsIds} })
+        .then(allVotes => {
 
             const detailedSurveys = surveys.map(survey => {
+                let totalVotesSurvey = 0
 
-                const totalVotesSurvey = allCounts.slice(i, i + survey.options.length).reduce((a, b) => a + b)
+                let options = survey.options.map(opt => {
+                    const optionsVotes = allVotes.filter(vote => {
+                        return JSON.stringify(vote.option_id) == JSON.stringify(opt._id)
+                    })
+                    totalVotesSurvey += optionsVotes.length
 
-                const options = survey.options.map(opt => {
                     let newOpt = {
                         _id: opt._id,
                         text: opt.text,
-                        totalCount: allCounts[i],
-                        percentage: (allCounts[i] / totalVotesSurvey * 100) || 0
+                        totalCount: optionsVotes.length,
+                        percentage: 0
                     }
-                    i++
 
                     return newOpt
+                })
+
+                options = options.map(opt => {
+                    return {...opt, percentage: (opt.totalCount / totalVotesSurvey * 100) || 0}
                 })
 
                 return {
