@@ -39,10 +39,8 @@ app.use(expressValidator({
 }))
 
 function authChecker(req, res, next) {
-    console.log(req.method)
     const token = req.body.token || req.headers['x-access-token']
-    if (req.url === '/auth' || req.url === '/user'
-    || (req.url === '/survey' && req.method == 'GET')) {
+    if (req.url === '/auth' || req.url === '/user') {
         return next()
     }
 
@@ -54,7 +52,10 @@ function authChecker(req, res, next) {
             req.decoded = decoded
             next()
         })
-    } else {
+    } else if (req.url === '/survey' && req.method == 'GET') {
+        return next()
+    }
+    else {
         res.redirect('/auth')
     }
 }
