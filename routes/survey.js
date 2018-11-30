@@ -7,29 +7,20 @@ import Vote from '../models/Vote'
 const router = express.Router()
 
 router.post('', (req, res) => {
-
-    const { title, content, explanation } = req.body
-    const options = JSON.parse(req.body.options)
-
     if (req.decoded._id !== process.env.IDADMIN) {
-        res.sjson({
+        return res.sjson({
             status: 403
         })
-    } else {
-        new Survey({
-            title,
-            content,
-            options,
-            explanation,
-        }).save((err, survey) => {
-            if (err) throw err
-
-            res.sjson({
-                status: 200,
-                data: survey,
-            })
-        })
     }
+
+    Survey.createFromBody(req.body, (err, survey) => {
+        if (err) throw err
+
+        res.sjson({
+            status: 200,
+            data: survey,
+        })
+    })
 })
 
 router.get('', (req, res) => {
@@ -37,22 +28,21 @@ router.get('', (req, res) => {
     .then(surveys => {
         const optionsIds = []
 
-        surveys.forEach(survey => {
+        surveys.forEach((survey) => {
             survey.options.forEach(opt => {
                 optionsIds.push(opt._id)
             })
         })
 
         return Vote.find({ option_id: { $in : optionsIds} })
-        .then(allVotes => {
-
-            const userId = req.decoded ? req.decoded._id : 0
+        .then((allVotes) => {
 
             const detailedSurveys = surveys.map(survey => {
                 let totalVotesSurvey = 0
 
-                const hasVoted = allVotes.find(vote => {
-                    return vote.user_id == userId && vote.survey_id == survey._id
+                const hasVoted = allVotes.find((vote) => {
+                    return vote.user_id == (req.decoded ? req.decoded._id : 0)
+                        && vote.survey_id == survey._id
                 }) || false
 
                 let options = survey.options.map(opt => {
@@ -71,9 +61,7 @@ router.get('', (req, res) => {
                     }
 
                     return newOpt
-                })
-
-                options = options.map(opt => {
+                }).map((opt) => {
                     return {...opt, percentage: (opt.voteNumber / totalVotesSurvey * 100) || 0}
                 })
 
@@ -100,17 +88,17 @@ router.post('/:id', (req, res) => {
     const optionId = req.params.id
 
     Vote.find({option_id: optionId, user_id: req.decoded._id}).countDocuments()
-    .then(voteCount => {
+    .then((voteCount) => {
         if (voteCount !== 0) {
             return res.sjson({
                 status: 403,
-                data: 'You already voted for that survey !'
+                error: 'You already voted for that survey !'
             })
         }
 
         Survey.findOne({
             'options._id': mongoose.Types.ObjectId(optionId)
-        }).then(survey => {
+        }).then((survey) => {
             new Vote({
                 user_id: mongoose.Types.ObjectId(req.decoded._id),
                 survey_id: survey.id,
@@ -124,7 +112,6 @@ router.post('/:id', (req, res) => {
             })
         })
     })
-
 })
 
 export default router

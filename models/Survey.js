@@ -11,4 +11,16 @@ const SurveySchema = mongoose.Schema({
     explanation: { type: String, required: true }
 })
 
-export default mongoose.model('Survey', SurveySchema)
+
+SurveySchema.statics.createFromBody = (body, cb) => {
+    return new Survey({
+        title: body.title,
+        content: body.content,
+        options: body.options,
+        explanation: body.explanation,
+    }).save(cb)
+}
+
+const Survey = mongoose.model('Survey', SurveySchema)
+
+export default Survey
