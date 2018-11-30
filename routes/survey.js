@@ -46,9 +46,7 @@ router.get('', (req, res) => {
         return Vote.find({ option_id: { $in : optionsIds} })
         .then(allVotes => {
 
-
             const userId = req.decoded ? req.decoded._id : 0
-
 
             const detailedSurveys = surveys.map(survey => {
                 let totalVotesSurvey = 0
@@ -57,14 +55,12 @@ router.get('', (req, res) => {
                     return vote.user_id == userId && vote.survey_id == survey._id
                 }) || false
 
-
                 let options = survey.options.map(opt => {
                     const optionsVotes = allVotes.filter(vote => {
                         return vote.option_id == opt._id
                     })
 
                     totalVotesSurvey += optionsVotes.length
-
 
                     let newOpt = {
                         _id: opt._id,
