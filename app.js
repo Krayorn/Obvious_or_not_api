@@ -4,7 +4,6 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
-import expressValidator from 'express-validator'
 
 import userRouter from './routes/user'
 import authRouter from './routes/auth'
@@ -21,22 +20,6 @@ app.use(bodyParser.urlencoded({
 }))
 
 app.use(bodyParser.json())
-
-app.use(expressValidator({
-    errorFormatter: (param, msg, value) => {
-        const namespace = param.split('.')
-        let formParam    = namespace.shift()
-
-        while(namespace.length) {
-            formParam += '[' + namespace.shift() + ']'
-        }
-        return {
-            param : formParam,
-            msg   : msg,
-            value : value
-        }
-    },
-}))
 
 function authChecker(req, res, next) {
     const token = req.body.token || req.headers['x-access-token']
