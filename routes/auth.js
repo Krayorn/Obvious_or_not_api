@@ -1,11 +1,13 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+
 import User from '../models/User'
+import forms from '../forms/auth'
 
 const router = express.Router()
 
-router.post('', function(req, res){
+router.post('', forms.auth, (req, res) => {
     User.findOne({username: req.body.username}, (err, user) => {
         if (!user) {
             return res.sjson({
@@ -27,7 +29,7 @@ router.post('', function(req, res){
                     },
                     process.env.SECRET,
                     {
-                        expiresIn: '24h'
+                        expiresIn: '1y'
                     })
 
                     return res.sjson({
