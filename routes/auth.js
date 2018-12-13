@@ -12,14 +12,14 @@ router.post('', forms.auth, (req, res) => {
         if (!user) {
             return res.sjson({
                 status: 401,
-                failed: 'Unrecognised Username'
+                error: 'Unrecognised Username'
             })
         }
         bcrypt.compare(req.body.password, user.password, (err, result) => {
             if(err) {
                 return res.sjson({
                     status: 401,
-                    failed: 'Unauthorized Access'
+                    error: 'Unauthorized Access'
                 })
             }
             if(result) {
@@ -39,7 +39,7 @@ router.post('', forms.auth, (req, res) => {
             }
             return res.sjson({
                 status: 401,
-                failed: 'Unauthorized Access'
+                error: 'Unauthorized Access'
             })
         })
     })
