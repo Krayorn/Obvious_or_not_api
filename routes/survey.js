@@ -87,18 +87,19 @@ router.get('', (req, res) => {
 router.post('/:id', (req, res) => {
     const optionId = req.params.id
 
-    Vote.find({option_id: optionId, user_id: req.decoded._id}).countDocuments()
-    .then((voteCount) => {
-        if (voteCount !== 0) {
-            return res.sjson({
-                status: 403,
-                error: 'You already voted for that survey !'
-            })
-        }
+    Survey.findOne({
+        'options._id': mongoose.Types.ObjectId(optionId)
+    }).then((survey) => {
 
-        Survey.findOne({
-            'options._id': mongoose.Types.ObjectId(optionId)
-        }).then((survey) => {
+        Vote.find({survey_id: survey._id, user_id: req.decoded._id}).countDocuments()
+        .then((voteCount) => {
+            if (voteCount !== 0) {
+                return res.sjson({
+                    status: 403,
+                    error: 'You already voted for that survey !'
+                })
+            }
+
             new Vote({
                 user_id: mongoose.Types.ObjectId(req.decoded._id),
                 survey_id: survey.id,
